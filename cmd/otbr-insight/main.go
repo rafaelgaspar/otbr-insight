@@ -51,7 +51,7 @@ func main() {
 	// socket when otbr-insight runs on the border router. Absent socket, the otbr-web
 	// endpoint is still tried, and absent that the feature reports itself unavailable.
 	if strings.TrimSpace(cfg.OTBRSocket) != "" {
-		socket := otctl.New(cfg.OTBRSocket, 30*time.Second)
+		socket := otctl.New(cfg.OTBRSocket, 300*time.Second)
 		client.SetNetworkScanner(socket)
 		// Channel energy scans, answered synchronously where REST needs an action.
 		client.SetEnergyScanner(socket)
