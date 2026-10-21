@@ -367,6 +367,19 @@ daemon socket  ─┘   via internal/otctl                                     �
 
 `internal/model` is the normalized contract shared by every layer. The OTBR client implements `service.ThreadProvider`. `internal/otctl` is injected into it through small optional interfaces — mesh reader, scanner, status reader, history reader, pinger — so `internal/otbr` never imports it and an absent socket simply means absent capability. `internal/mcpserver` sits beside the REST handlers on the same mux and reads the same snapshots and name store, reshaping them for a language model; it is one of two places the module takes a dependency, on the official MCP Go SDK; the other is `internal/mdns`, a one-shot multicast DNS browser on `golang.org/x/net`'s wire-format parser, which `internal/matter` uses to group Matter nodes by fabric. `internal/names` and `internal/backup` are the only persistent state.
 
+## rafaelgaspar fork
+
+This repository is a [rafaelgaspar](https://github.com/rafaelgaspar) fork of [sumitbirla/otbr-insight](https://github.com/sumitbirla/otbr-insight). Integration releases ship from the **`rafaelgaspar`** branch as `ghcr.io/rafaelgaspar/otbr-insight:vX.Y.Z-rafaelgaspar.N` (and `latest` on publish).
+
+| Layer | Branch | Notes |
+| --- | --- | --- |
+| Fork infra | `feat/rafaelgaspar` | fork-pack, GHCR image, tag-bump |
+| Daemon socket read timeout | `feat/daemon-socket-timeout` | Longer `meshdiag` sweeps on large meshes |
+| REST discovery fallback | `feat/refresh-mesh-fallback` | Run OTBR sweeps when live mesh fails |
+| Link metrics from topology | `feat/link-metrics-topology` | Device list RSSI/margin from diagnostics |
+
+Fork workflow: `.cursor/skills/rafaelgaspar-fork/SKILL.md` (from [fork-pack](https://github.com/rafaelgaspar/fork-pack)).
+
 ## License
 
 [MIT](LICENSE)

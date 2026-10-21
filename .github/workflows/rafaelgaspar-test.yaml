@@ -1,0 +1,26 @@
+name: rafaelgaspar test
+
+on:
+  push:
+    branches:
+      - feat/*
+  pull_request:
+    branches:
+      - rafaelgaspar
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: make test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-go@40dc31865998ff486b5dae8a62028b175875278d # v5
+        with:
+          go-version-file: go.mod
+
+      - name: Test
+        run: make test
