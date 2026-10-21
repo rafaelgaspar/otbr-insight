@@ -374,6 +374,7 @@ This repository is a [rafaelgaspar](https://github.com/rafaelgaspar) fork of [su
 | Layer | Branch | Notes |
 | --- | --- | --- |
 | Fork infra | `feat/rafaelgaspar` | fork-pack, GHCR image, tag-bump |
+| Debian forkly + latest Go | `feat/latest-golang-and-forky` | `go.dev` toolchain on forkly build stage |
 | Daemon socket read timeout | `feat/daemon-socket-timeout` | Longer `meshdiag` sweeps on large meshes |
 | REST discovery fallback | `feat/refresh-mesh-fallback` | Run OTBR sweeps when live mesh fails |
 | Link metrics from topology | `feat/link-metrics-topology` | Device list RSSI/margin from diagnostics |
