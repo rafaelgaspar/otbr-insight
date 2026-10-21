@@ -861,7 +861,11 @@ func (c *Client) RefreshMesh(ctx context.Context, routers []string) error {
 	// Each sweep costs real airtime, so skip it rather than keeping a cache warm
 	// that would be stale anyway if we ever needed it.
 	if c.mesh != nil && c.mesh.Available() {
-		return nil
+		if _, _, ok := c.liveMesh(ctx); ok {
+			return nil
+		}
+		// Socket present but live mesh failed (timeouts, broken CLI session, etc.).
+		// Keep OTBR's device/diagnostic caches warm for the REST fallback.
 	}
 	// One request carries both kinds of action; /api/actions takes an array.
 	items := []any{map[string]any{
