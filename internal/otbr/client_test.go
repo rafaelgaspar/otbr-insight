@@ -1124,6 +1124,15 @@ func TestDiscoverySweepsAreSkippedWhenLiveMeshIsInUse(t *testing.T) {
 		t.Error("posted a discovery action while live mesh data was available")
 	}
 
+	client.SetMeshReader(&stubMesh{available: true, err: errors.New("meshdiag timed out")})
+	posted = false
+	if err := client.RefreshMesh(context.Background(), []string{"1a2b3c4d5e6f7a8b"}); err != nil {
+		t.Fatal(err)
+	}
+	if !posted {
+		t.Error("no discovery action posted when live mesh failed despite an available socket")
+	}
+
 	// Without a live reader the sweep must still run, or the REST fallback goes stale.
 	client.SetMeshReader(nil)
 	if err := client.RefreshMesh(context.Background(), []string{"1a2b3c4d5e6f7a8b"}); err != nil {
