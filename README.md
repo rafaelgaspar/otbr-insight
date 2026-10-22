@@ -1,3 +1,5 @@
+
+
 ## rafaelgaspar fork
 
 This repository is a [rafaelgaspar](https://github.com/rafaelgaspar) fork of [sumitbirla/otbr-insight](https://github.com/sumitbirla/otbr-insight). Integration releases ship from the **`rafaelgaspar`** branch as `ghcr.io/rafaelgaspar/otbr-insight:vX.Y.Z-rafaelgaspar.N` (and `latest` on publish).
@@ -5,6 +7,7 @@ This repository is a [rafaelgaspar](https://github.com/rafaelgaspar) fork of [su
 | Layer | Branch | Notes |
 | --- | --- | --- |
 | Fork infra | `feat/rafaelgaspar` | fork-pack, GHCR image, tag-bump |
+| Debian forkly + latest Go | `feat/latest-golang-and-forky` | `go.dev` toolchain on forkly build stage |
 | Daemon socket read timeout | `feat/daemon-socket-timeout` | Longer `meshdiag` sweeps on large meshes |
 | REST discovery fallback | `feat/refresh-mesh-fallback` | Run OTBR sweeps when live mesh fails |
 | Link metrics from topology | `feat/link-metrics-topology` | Device list RSSI/margin from diagnostics |
