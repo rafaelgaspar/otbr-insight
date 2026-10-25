@@ -1,3 +1,16 @@
+## rafaelgaspar fork
+
+This repository is a [rafaelgaspar](https://github.com/rafaelgaspar) fork of [sumitbirla/otbr-insight](https://github.com/sumitbirla/otbr-insight). Integration releases ship from the **`rafaelgaspar`** branch as `ghcr.io/rafaelgaspar/otbr-insight:vX.Y.Z-rafaelgaspar.N` (and `latest` on publish).
+
+| Layer | Branch | Notes |
+| --- | --- | --- |
+| Fork infra | `feat/rafaelgaspar` | fork-pack, GHCR image, tag-bump |
+| Daemon socket read timeout | `feat/daemon-socket-timeout` | Longer `meshdiag` sweeps on large meshes |
+| REST discovery fallback | `feat/refresh-mesh-fallback` | Run OTBR sweeps when live mesh fails |
+| Link metrics from topology | `feat/link-metrics-topology` | Device list RSSI/margin from diagnostics |
+
+Fork workflow: `.cursor/skills/rafaelgaspar-fork/SKILL.md` (from [fork-pack](https://github.com/rafaelgaspar/fork-pack)).
+
 # OTBR Insight
 
 OTBR Insight is a monitoring and management dashboard for an [OpenThread Border Router](https://openthread.io/guides/border-router) (OTBR). It is a single Go binary with no runtime dependencies: it polls the OTBR REST API, normalizes the version-dependent responses, and serves an embedded web interface.
