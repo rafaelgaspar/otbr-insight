@@ -8,7 +8,7 @@ This repository is a [rafaelgaspar](https://github.com/rafaelgaspar) fork of [su
 | --- | --- | --- |
 | Fork infra | `feat/rafaelgaspar` | fork-pack, GHCR image, tag-bump |
 | Debian forkly + latest Go | `feat/latest-golang-and-forky` | `go.dev` toolchain on forkly build stage |
-| Daemon socket read timeout | `feat/daemon-socket-timeout` | Longer `meshdiag` sweeps on large meshes |
+| Daemon socket read timeout | `feat/daemon-socket-timeout` | `--otbr-socket-timeout` / `OTBR_INSIGHT_OTBR_SOCKET_TIMEOUT` (default 300s) |
 | REST discovery fallback | `feat/refresh-mesh-fallback` | Run OTBR sweeps when live mesh fails |
 | Link metrics from topology | `feat/link-metrics-topology` | Device list RSSI/margin from diagnostics |
 
@@ -132,6 +132,7 @@ Each option can be set by flag or environment variable. Flags take precedence.
 | `--poll-interval` | `OTBR_INSIGHT_POLL_INTERVAL` | `5s` | How often to poll node status (minimum 1s). Devices and topology poll at 3× this with a 15s floor over REST, or at this same interval when the daemon socket supplies them |
 | `--discovery-interval` | `OTBR_INSIGHT_DISCOVERY_INTERVAL` | `5m` | How often to ask OTBR to rediscover the mesh; `0` disables, minimum 30s. Skipped entirely while the daemon socket is supplying live data |
 | `--otbr-socket` | `OTBR_INSIGHT_OTBR_SOCKET` | `/run/openthread-wpan0.sock` | OpenThread daemon socket; empty disables. Only usable on the border router host |
+| `--otbr-socket-timeout` | `OTBR_INSIGHT_OTBR_SOCKET_TIMEOUT` | `300s` | Read timeout for that socket. `meshdiag` on a large mesh needs several minutes |
 | `--log-level` | `OTBR_INSIGHT_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, or `error` |
 | `--data-dir` | `OTBR_INSIGHT_DATA_DIR` | see below | Directory for device names and the dataset backup; empty disables both |
 
