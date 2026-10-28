@@ -23,6 +23,7 @@ type Config struct {
 	LogLevel          string
 	DataDir           string
 	OTBRSocket        string
+	MDNSInterface     string
 }
 
 // defaults returns the configuration before any flag is applied: the built-in
@@ -37,10 +38,14 @@ func defaults() (Config, error) {
 		DiscoveryInterval: 5 * time.Minute,
 		LogLevel:          envOr("OTBR_INSIGHT_LOG_LEVEL", "info"),
 		DataDir:           resolveDataDir(os.Getenv("OTBR_INSIGHT_DATA_DIR")),
-		// Only usable when otbr-insight runs on the border router itself; harmless
-		// elsewhere, where the socket simply will not exist.
-		OTBRSocket: envOr("OTBR_INSIGHT_OTBR_SOCKET", otctl.DefaultSocket),
 	}
+	if v, ok := os.LookupEnv("OTBR_INSIGHT_OTBR_SOCKET"); ok {
+		// Empty string deliberately disables the live mesh reader (same as --otbr-socket=).
+		cfg.OTBRSocket = v
+	} else {
+		cfg.OTBRSocket = otctl.DefaultSocket
+	}
+	cfg.MDNSInterface = strings.TrimSpace(os.Getenv("OTBR_INSIGHT_MDNS_INTERFACE"))
 	if raw := os.Getenv("OTBR_INSIGHT_POLL_INTERVAL"); raw != "" {
 		d, err := time.ParseDuration(raw)
 		if err != nil {
@@ -68,6 +73,7 @@ func bindFlags(fs *flag.FlagSet, cfg *Config) {
 	fs.StringVar(&cfg.LogLevel, "log-level", cfg.LogLevel, "log level: debug, info, warn, error")
 	fs.StringVar(&cfg.DataDir, "data-dir", cfg.DataDir, "directory for persisted device names and the dataset backup (empty disables both)")
 	fs.StringVar(&cfg.OTBRSocket, "otbr-socket", cfg.OTBRSocket, "OpenThread daemon socket for capabilities the REST API lacks; empty disables (only usable on the border router host)")
+	fs.StringVar(&cfg.MDNSInterface, "mdns-interface", cfg.MDNSInterface, "network interface for Matter mDNS browse (e.g. backbone); empty uses the host default")
 }
 
 // envVars documents each flag's environment-variable equivalent, in the order the
@@ -80,6 +86,7 @@ var envVars = [][2]string{
 	{"OTBR_INSIGHT_LOG_LEVEL", "log-level"},
 	{"OTBR_INSIGHT_DATA_DIR", "data-dir"},
 	{"OTBR_INSIGHT_OTBR_SOCKET", "otbr-socket"},
+	{"OTBR_INSIGHT_MDNS_INTERFACE", "mdns-interface"},
 }
 
 // printDefaults is flag.PrintDefaults with double-hyphen names, matching how this

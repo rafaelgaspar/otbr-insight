@@ -202,7 +202,7 @@ func Handler(data Snapshotter, names NameStore, control NetworkController, backu
 	mux.HandleFunc("GET /api/v1/health", func(w http.ResponseWriter, _ *http.Request) {
 		overview := data.Snapshot()
 		status := http.StatusOK
-		if overview.Status == "offline" && !overview.HasData {
+		if overview.APIHealth != "healthy" || overview.Status == "offline" {
 			status = http.StatusServiceUnavailable
 		}
 		writeJSON(w, status, map[string]any{"status": overview.Status, "apiHealth": overview.APIHealth})

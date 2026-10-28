@@ -102,6 +102,27 @@ func TestUnavailableWhenTheSocketIsMissing(t *testing.T) {
 	}
 }
 
+func TestExecuteFailsWhenAnotherCommandHoldsTheLock(t *testing.T) {
+	path := fakeDaemon(t, map[string]string{
+		"slow": "waiting\r\nDone\r\n",
+	})
+	client := New(path, 5*time.Second)
+	started := make(chan struct{})
+	done := make(chan struct{})
+	go func() {
+		close(started)
+		_, _ = client.Execute(context.Background(), "slow")
+		close(done)
+	}()
+	<-started
+	time.Sleep(20 * time.Millisecond)
+	_, err := client.Execute(context.Background(), "state")
+	if !errors.Is(err, ErrDaemonBusy) {
+		t.Fatalf("Execute() error = %v, want ErrDaemonBusy", err)
+	}
+	<-done
+}
+
 func TestExecuteFailsOnATruncatedReply(t *testing.T) {
 	// A reply with no "Done" must not be handed back as if it were complete.
 	path := fakeDaemon(t, map[string]string{"discover": "| PAN  | MAC Address      |\r\n"})

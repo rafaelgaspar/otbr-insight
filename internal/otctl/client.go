@@ -50,6 +50,11 @@ func (unavailableError) SocketUnavailable() bool { return true }
 // case when otbr-insight runs anywhere other than the border router.
 var ErrUnavailable error = unavailableError{"OpenThread daemon socket is unavailable"}
 
+// ErrDaemonBusy reports that another command is already using the serialised
+// daemon socket. Callers should fail fast rather than queue behind a long
+// meshdiag sweep, which otherwise makes HTTP handlers outlive their timeouts.
+var ErrDaemonBusy = errors.New("OpenThread daemon is busy")
+
 // meshStructureCache holds everything that costs over-the-air queries. Ages and
 // signal are deliberately not cached — they come from local tables on every call.
 type meshStructureCache struct {
@@ -108,7 +113,9 @@ func (c *Client) Execute(ctx context.Context, command string) ([]string, error) 
 		return nil, fmt.Errorf("%w at %s", ErrUnavailable, c.path)
 	}
 
-	c.mu.Lock()
+	if !c.mu.TryLock() {
+		return nil, fmt.Errorf("%w: another command is in progress", ErrDaemonBusy)
+	}
 	defer c.mu.Unlock()
 
 	deadline := time.Now().Add(c.timeout)
