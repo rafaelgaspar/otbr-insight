@@ -152,8 +152,8 @@ func (m *Monitor) Run(ctx context.Context) {
 	// result lands in time for the device ticker rather than this first read.
 	m.refreshOverview(ctx)
 	m.refreshDeviceCollection(ctx)
-	m.refreshDevices(ctx)
 	m.refreshTopology(ctx)
+	m.refreshDevices(ctx)
 	m.refreshCapabilities(ctx)
 	overviewTicker := time.NewTicker(m.pollEvery)
 	deviceEvery := 3 * m.pollEvery
@@ -179,8 +179,8 @@ func (m *Monitor) Run(ctx context.Context) {
 		case <-overviewTicker.C:
 			m.refreshOverview(ctx)
 		case <-deviceTicker.C:
-			m.refreshDevices(ctx)
 			m.refreshTopology(ctx)
+			m.refreshDevices(ctx)
 		case <-capabilityTicker.C:
 			m.refreshCapabilities(ctx)
 		case <-discoveryTicker.C:
@@ -302,6 +302,7 @@ func (m *Monitor) refreshDevices(ctx context.Context) {
 		m.logger.Warn("OTBR device refresh failed", "error", err)
 		return
 	}
+	enrichDeviceLinkMetrics(inventory, m.topology)
 	mergeBorderRouter(inventory, m.overview)
 	now := time.Now().UTC()
 	inventory.LastAttempt = attempt
