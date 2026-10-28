@@ -103,20 +103,51 @@ func TestUnavailableWhenTheSocketIsMissing(t *testing.T) {
 }
 
 func TestExecuteFailsWhenAnotherCommandHoldsTheLock(t *testing.T) {
-	path := fakeDaemon(t, map[string]string{
-		"slow": "waiting\r\nDone\r\n",
-	})
+	dir, err := os.MkdirTemp("/tmp", "otctl-busy")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(dir) })
+	path := filepath.Join(dir, "d.sock")
+	release := make(chan struct{})
+	listener, err := net.Listen("unix", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = listener.Close() })
+	go func() {
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				return
+			}
+			go func() {
+				defer conn.Close()
+				scanner := bufio.NewScanner(conn)
+				for scanner.Scan() {
+					command := strings.TrimSpace(scanner.Text())
+					if command != "hold" {
+						_, _ = conn.Write([]byte("> " + command + "\r\nError 35: InvalidCommand\r\n"))
+						continue
+					}
+					<-release
+					_, _ = conn.Write([]byte("> hold\r\nheld\r\nDone\r\n"))
+				}
+			}()
+		}
+	}()
 	client := New(path, 5*time.Second)
 	started := make(chan struct{})
 	done := make(chan struct{})
 	go func() {
 		close(started)
-		_, _ = client.Execute(context.Background(), "slow")
+		_, _ = client.Execute(context.Background(), "hold")
 		close(done)
 	}()
 	<-started
-	time.Sleep(20 * time.Millisecond)
-	_, err := client.Execute(context.Background(), "state")
+	time.Sleep(50 * time.Millisecond)
+	_, err = client.Execute(context.Background(), "state")
+	close(release)
 	if !errors.Is(err, ErrDaemonBusy) {
 		t.Fatalf("Execute() error = %v, want ErrDaemonBusy", err)
 	}
