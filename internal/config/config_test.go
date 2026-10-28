@@ -94,7 +94,7 @@ func TestUsageListsEveryFlagWithItsDefault(t *testing.T) {
 	out := buf.String()
 	// Double hyphen, matching the README, CLAUDE.md and the systemd unit. Go's flag
 	// package accepts both forms, so this is purely about presenting one convention.
-	for _, name := range []string{"listen", "otbr-url", "poll-interval", "discovery-interval", "log-level", "data-dir", "otbr-socket", "otbr-socket-timeout"} {
+	for _, name := range []string{"listen", "otbr-url", "poll-interval", "discovery-interval", "log-level", "data-dir", "otbr-socket", "otbr-socket-timeout", "mdns-interface"} {
 		if !strings.Contains(out, "--"+name) {
 			t.Errorf("usage is missing the --%s flag", name)
 		}
