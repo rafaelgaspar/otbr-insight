@@ -94,7 +94,7 @@ func TestUsageListsEveryFlagWithItsDefault(t *testing.T) {
 	out := buf.String()
 	// Double hyphen, matching the README, CLAUDE.md and the systemd unit. Go's flag
 	// package accepts both forms, so this is purely about presenting one convention.
-	for _, name := range []string{"listen", "otbr-url", "poll-interval", "discovery-interval", "log-level", "data-dir", "otbr-socket"} {
+	for _, name := range []string{"listen", "otbr-url", "poll-interval", "discovery-interval", "log-level", "data-dir", "otbr-socket", "otbr-socket-timeout"} {
 		if !strings.Contains(out, "--"+name) {
 			t.Errorf("usage is missing the --%s flag", name)
 		}
@@ -122,6 +122,37 @@ func TestUsageListsEveryFlagWithItsDefault(t *testing.T) {
 	probe.VisitAll(func(*flag.Flag) { registered++ })
 	if len(envVars) != registered {
 		t.Errorf("envVars has %d entries but bindFlags registers %d flags", len(envVars), registered)
+	}
+}
+
+func TestOTBRSocketTimeoutDefaultAndOverride(t *testing.T) {
+	cfg, err := Parse(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.OTBRSocketTimeout != 300*time.Second {
+		t.Errorf("default OTBRSocketTimeout = %s, want 300s", cfg.OTBRSocketTimeout)
+	}
+
+	cfg, err = Parse([]string{"--otbr-socket-timeout", "45s"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.OTBRSocketTimeout != 45*time.Second {
+		t.Errorf("OTBRSocketTimeout = %s, want 45s", cfg.OTBRSocketTimeout)
+	}
+
+	t.Setenv("OTBR_INSIGHT_OTBR_SOCKET_TIMEOUT", "2m")
+	cfg, err = Parse(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.OTBRSocketTimeout != 2*time.Minute {
+		t.Errorf("env OTBRSocketTimeout = %s, want 2m", cfg.OTBRSocketTimeout)
+	}
+
+	if _, err := Parse([]string{"--otbr-socket-timeout", "500ms"}); err == nil {
+		t.Error("Parse() error = nil for a 500ms socket timeout, want an error")
 	}
 }
 
