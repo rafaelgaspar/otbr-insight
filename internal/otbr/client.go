@@ -379,9 +379,9 @@ func (c *Client) History(ctx context.Context) (*model.History, error) {
 			Error: "event history needs the OpenThread daemon socket, which is only available when otbr-insight runs on the border router",
 		}, nil
 	}
-	history, err := c.history.History(ctx)
+	history, err := c.historyWithRetry(ctx)
 	if err != nil {
-		if errors.Is(err, otctl.ErrDaemonBusy) {
+		if otctl.IsDaemonBusy(err) {
 			return &model.History{
 				Status: "unavailable", Network: []model.NetworkHistoryEntry{}, Neighbors: []model.NeighborHistoryEntry{},
 				Error: "the OpenThread daemon is busy with another command; try again in a moment",
@@ -393,6 +393,21 @@ func (c *Client) History(ctx context.Context) (*model.History, error) {
 		}, nil
 	}
 	return history, nil
+}
+
+func (c *Client) historyWithRetry(ctx context.Context) (*model.History, error) {
+	const pause = 250 * time.Millisecond
+	for {
+		history, err := c.history.History(ctx)
+		if err == nil || !otctl.IsDaemonBusy(err) {
+			return history, err
+		}
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-time.After(pause):
+		}
+	}
 }
 
 // FabricDeviceContext returns SRP registration data for Matter fabric discovery.

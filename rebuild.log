@@ -80,3 +80,8 @@ M	rebuild.log
 ==> rebuild feat/insight-runtime-fixes on 48fadfc3b137bffb3f049116a9cfbfce37ebd555
 Switched to a new branch 'feat/insight-runtime-fixes'
 M	rebuild.log
+[feat/insight-runtime-fixes a7dcd53] feat(insight-runtime-fixes): mesh backoff, history busy, Matter SRP, mDNS iface
+ 14 files changed, 272 insertions(+), 11 deletions(-)
+==> rebuild feat/history-interactive-socket on a7dcd534f2f9644977ba5647c74f38f64b7c4056
+Switched to a new branch 'feat/history-interactive-socket'
+M	rebuild.log

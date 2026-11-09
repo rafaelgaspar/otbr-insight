@@ -51,23 +51,20 @@ func main() {
 	// socket when otbr-insight runs on the border router. Absent socket, the otbr-web
 	// endpoint is still tried, and absent that the feature reports itself unavailable.
 	if strings.TrimSpace(cfg.OTBRSocket) != "" {
-		socket := otctl.New(cfg.OTBRSocket, cfg.OTBRSocketTimeout)
-		client.SetNetworkScanner(socket)
-		// Channel energy scans, answered synchronously where REST needs an action.
-		client.SetEnergyScanner(socket)
-		// Live device and topology data, preferred over OTBR's REST caches.
-		client.SetMeshReader(socket)
-		// Runtime fields otbr-web used to supply; the socket has them either way.
-		client.SetStatusReader(socket)
-		// Reachability testing, which only the border router can perform.
-		client.SetPinger(socket)
-		// OpenThread's own event recorder, for the diagnostics view.
-		client.SetHistoryReader(socket)
-		if socket.Available() {
-			// Only a stat: whether it can actually be opened shows up on first use.
-			logger.Info("OpenThread daemon socket present", "path", socket.Path())
+		// Meshdiag can run for minutes; everything else should not queue behind it
+		// on the same process-wide mutex.
+		meshSocket := otctl.New(cfg.OTBRSocket, cfg.OTBRSocketTimeout)
+		interactive := otctl.New(cfg.OTBRSocket, 30*time.Second)
+		client.SetNetworkScanner(interactive)
+		client.SetEnergyScanner(interactive)
+		client.SetMeshReader(meshSocket)
+		client.SetStatusReader(interactive)
+		client.SetPinger(interactive)
+		client.SetHistoryReader(interactive)
+		if meshSocket.Available() {
+			logger.Info("OpenThread daemon socket present", "path", meshSocket.Path())
 		} else {
-			logger.Info("OpenThread daemon socket not present; nearby-network scanning will fall back to otbr-web", "path", socket.Path())
+			logger.Info("OpenThread daemon socket not present; nearby-network scanning will fall back to otbr-web", "path", meshSocket.Path())
 		}
 	}
 
