@@ -1,0 +1,29 @@
+==> integration branch: rafaelgaspar
+==> upstream base: v0.2.0 (f789640d5482a8eaa782ba00fcb93a4511adeb1a)
+==> stack order (7 branches):
+  - feat/rafaelgaspar (base: v0.2.0)
+  - feat/latest-golang-and-forky (base: feat/rafaelgaspar)
+  - feat/daemon-socket-timeout (base: feat/latest-golang-and-forky)
+  - feat/refresh-mesh-fallback (base: feat/daemon-socket-timeout)
+  - feat/link-metrics-topology (base: feat/refresh-mesh-fallback)
+  - feat/insight-runtime-fixes (base: feat/link-metrics-topology)
+  - feat/history-interactive-socket (base: feat/insight-runtime-fixes)
+==> stack tip: feat/history-interactive-socket
+==> mergiraf merge driver enabled (mergiraf 0.20.0)
+==> rebuild feat/rafaelgaspar on f789640d5482a8eaa782ba00fcb93a4511adeb1a
+Switched to a new branch 'feat/rafaelgaspar'
+warning: adding embedded git repository: .fork-pack
+hint: You've added another git repository inside your current repository.
+hint: Clones of the outer repository will not contain the contents of
+hint: the embedded repository and will not know how to obtain it.
+hint: If you meant to add a submodule, use:
+hint:
+hint: 	git submodule add <url> .fork-pack
+hint:
+hint: If you added this path by mistake, you can remove it from the
+hint: index with:
+hint:
+hint: 	git rm --cached .fork-pack
+hint:
+hint: See "git help submodule" for more information.
+hint: Disable this message with "git config set advice.addEmbeddedRepo false"
