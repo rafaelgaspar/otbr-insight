@@ -63,3 +63,8 @@ M	rebuild.log
 ==> rebuild feat/daemon-socket-timeout on 5153dcf0351043a2aa31a7e11d8c08509a2aa1d3
 Switched to a new branch 'feat/daemon-socket-timeout'
 M	rebuild.log
+[feat/daemon-socket-timeout a358d1a] feat(daemon-socket-timeout): make meshdiag socket timeout configurable
+ 5 files changed, 57 insertions(+), 3 deletions(-)
+==> rebuild feat/refresh-mesh-fallback on a358d1aba92f77cb3c3d8d3dc0b1440920c195b7
+Switched to a new branch 'feat/refresh-mesh-fallback'
+M	rebuild.log
