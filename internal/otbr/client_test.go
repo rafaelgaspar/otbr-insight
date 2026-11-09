@@ -1083,6 +1083,32 @@ func TestLiveMeshIsPreferredAndReadOncePerPoll(t *testing.T) {
 	}
 }
 
+func TestLiveMeshFailureBackoffAvoidsRetryStorm(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"data":[{"id":"rest","type":"device","attributes":{"extAddress":"aabb","role":"router"}}]}`))
+	}))
+	defer server.Close()
+	client, err := NewClient(server.URL, server.Client())
+	if err != nil {
+		t.Fatal(err)
+	}
+	mesh := &stubMesh{available: true, err: errors.New("meshdiag timed out")}
+	client.SetMeshReader(mesh)
+
+	if _, err := client.Devices(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if mesh.calls != 1 {
+		t.Fatalf("first Devices() Mesh() calls = %d, want 1", mesh.calls)
+	}
+	if _, err := client.Devices(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if mesh.calls != 1 {
+		t.Errorf("second Devices() Mesh() calls = %d, want still 1 during backoff", mesh.calls)
+	}
+}
+
 func TestRestIsUsedWhenTheLiveReaderFails(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(`{"data":[{"id":"rest","type":"device","attributes":{"extAddress":"aabb","role":"router"}}]}`))
