@@ -68,3 +68,8 @@ M	rebuild.log
 ==> rebuild feat/refresh-mesh-fallback on a358d1aba92f77cb3c3d8d3dc0b1440920c195b7
 Switched to a new branch 'feat/refresh-mesh-fallback'
 M	rebuild.log
+[feat/refresh-mesh-fallback 759d381] feat(refresh-mesh-fallback): run OTBR sweeps when live mesh fails
+ 3 files changed, 27 insertions(+), 2 deletions(-)
+==> rebuild feat/link-metrics-topology on 759d381851094e541ef89e23012893ed642bccf8
+Switched to a new branch 'feat/link-metrics-topology'
+M	rebuild.log
