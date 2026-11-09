@@ -27,3 +27,33 @@ hint: 	git rm --cached .fork-pack
 hint:
 hint: See "git help submodule" for more information.
 hint: Disable this message with "git config set advice.addEmbeddedRepo false"
+[feat/rafaelgaspar 5408195] feat(rafaelgaspar): tag integration releases from restacked upstream
+ 12 files changed, 1235 insertions(+), 54 deletions(-)
+ create mode 120000 .claude/skills
+ create mode 100644 .cursor/skills/README.md
+ create mode 100644 .cursor/skills/rafaelgaspar-fork/SKILL.md
+ create mode 160000 .fork-pack
+ create mode 100755 .github/scripts/rebuild-rafaelgaspar.sh
+ create mode 100755 .github/scripts/resolve-integration-tag.sh
+ create mode 100644 .github/workflows/rafaelgaspar-ghcr-publish.yaml
+ create mode 100644 .github/workflows/rafaelgaspar-tag-bump.yaml
+ create mode 100644 .github/workflows/rafaelgaspar-test.yaml
+ delete mode 100644 .github/workflows/release.yml
+ create mode 100644 rebuild.log
+[feat/rafaelgaspar 3e71e28] feat(rafaelgaspar): tag integration releases from restacked upstream
+ Date: Mon Nov 9 17:24:10 2026 +0000
+ 12 files changed, 1312 insertions(+), 54 deletions(-)
+ create mode 120000 .claude/skills
+ create mode 100644 .cursor/skills/README.md
+ create mode 100644 .cursor/skills/rafaelgaspar-fork/SKILL.md
+ create mode 160000 .fork-pack
+ create mode 100755 .github/scripts/rebuild-rafaelgaspar.sh
+ create mode 100755 .github/scripts/resolve-integration-tag.sh
+ create mode 100644 .github/workflows/rafaelgaspar-ghcr-publish.yaml
+ create mode 100644 .github/workflows/rafaelgaspar-tag-bump.yaml
+ create mode 100644 .github/workflows/rafaelgaspar-test.yaml
+ delete mode 100644 .github/workflows/release.yml
+ create mode 100644 rebuild.log
+==> rebuild feat/latest-golang-and-forky on 3e71e28035cf5e65899b713be98350b6dc72deee
+Switched to a new branch 'feat/latest-golang-and-forky'
+M	rebuild.log
