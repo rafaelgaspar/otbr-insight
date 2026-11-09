@@ -57,3 +57,9 @@ hint: Disable this message with "git config set advice.addEmbeddedRepo false"
 ==> rebuild feat/latest-golang-and-forky on 3e71e28035cf5e65899b713be98350b6dc72deee
 Switched to a new branch 'feat/latest-golang-and-forky'
 M	rebuild.log
+[feat/latest-golang-and-forky 5153dcf] feat(latest-golang-and-forky): Debian forkly builder with latest Go
+ 3 files changed, 80 insertions(+)
+ create mode 100644 Dockerfile
+==> rebuild feat/daemon-socket-timeout on 5153dcf0351043a2aa31a7e11d8c08509a2aa1d3
+Switched to a new branch 'feat/daemon-socket-timeout'
+M	rebuild.log
