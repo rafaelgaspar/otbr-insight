@@ -73,3 +73,10 @@ M	rebuild.log
 ==> rebuild feat/link-metrics-topology on 759d381851094e541ef89e23012893ed642bccf8
 Switched to a new branch 'feat/link-metrics-topology'
 M	rebuild.log
+[feat/link-metrics-topology 48fadfc] feat(link-metrics-topology): copy diagnostic link fields into device list
+ 4 files changed, 132 insertions(+), 2 deletions(-)
+ create mode 100644 internal/service/link_enrich.go
+ create mode 100644 internal/service/link_enrich_test.go
+==> rebuild feat/insight-runtime-fixes on 48fadfc3b137bffb3f049116a9cfbfce37ebd555
+Switched to a new branch 'feat/insight-runtime-fixes'
+M	rebuild.log

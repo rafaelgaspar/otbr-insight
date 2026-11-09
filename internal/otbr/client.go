@@ -17,11 +17,17 @@ import (
 	"time"
 
 	"github.com/otbr-insight/otbr-insight/internal/model"
+	"github.com/otbr-insight/otbr-insight/internal/otctl"
 )
 
 // meshSnapshotTTL keeps one live reading serving the device and topology calls of
 // a single poll without letting it go stale between polls.
 const meshSnapshotTTL = 2 * time.Second
+
+// meshFailureBackoff pauses live mesh retries after a timeout. Without it every
+// device/topology poll blocks on another full meshdiag sweep even though REST
+// collections are ready to read.
+const meshFailureBackoff = 2 * time.Minute
 
 const maxResponseBytes = 2 << 20
 
@@ -375,12 +381,30 @@ func (c *Client) History(ctx context.Context) (*model.History, error) {
 	}
 	history, err := c.history.History(ctx)
 	if err != nil {
+		if errors.Is(err, otctl.ErrDaemonBusy) {
+			return &model.History{
+				Status: "unavailable", Network: []model.NetworkHistoryEntry{}, Neighbors: []model.NeighborHistoryEntry{},
+				Error: "the OpenThread daemon is busy with another command; try again in a moment",
+			}, nil
+		}
 		return &model.History{
 			Status: "unavailable", Network: []model.NetworkHistoryEntry{}, Neighbors: []model.NeighborHistoryEntry{},
 			Error: err.Error(),
 		}, nil
 	}
 	return history, nil
+}
+
+// FabricDeviceContext returns SRP registration data for Matter fabric discovery.
+func (c *Client) FabricDeviceContext(ctx context.Context) ([]model.Device, error) {
+	type srpFabricSource interface {
+		Available() bool
+		DevicesWithSRP(context.Context) ([]model.Device, error)
+	}
+	if src, ok := c.history.(srpFabricSource); ok && src.Available() {
+		return src.DevicesWithSRP(ctx)
+	}
+	return nil, nil
 }
 
 // Pinger is an optional source for reachability tests. Only the daemon socket can
@@ -484,6 +508,9 @@ func (c *Client) liveMesh(ctx context.Context) (*model.DeviceInventory, *model.T
 	defer c.meshMu.Unlock()
 	if time.Since(c.meshFetched) < meshSnapshotTTL && c.meshDevices != nil {
 		return c.meshDevices, c.meshTopology, true
+	}
+	if c.meshFailing && time.Since(c.meshFetched) < meshFailureBackoff {
+		return nil, nil, false
 	}
 	devices, topology, err := c.mesh.Mesh(ctx)
 	if err != nil {
