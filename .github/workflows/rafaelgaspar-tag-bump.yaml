@@ -1,3 +1,6 @@
+# Thin caller to drop into a fork at .github/workflows/rafaelgaspar-tag-bump.yaml
+# Fill in with: from members.yaml (upstream_url, tag_glob, tag_filter, publish_workflow).
+# Reusable lives in fork-pack .github/workflows (workflow_call only).
 name: rafaelgaspar Tag Bump
 
 on:
@@ -33,10 +36,15 @@ jobs:
       upstream_url: https://github.com/sumitbirla/otbr-insight.git
       tag_glob: 'v*.*.*'
       tag_filter: '^v[0-9]+\.[0-9]+\.[0-9]+$'
+      tracks: tag
+      # schedule has no workflow_dispatch inputs; passing inputs.* (null) into
+      # boolean reusable inputs fails the called job before it starts.
       upstream_tag: ${{ github.event.inputs.upstream_tag || '' }}
       dry_run: ${{ github.event.inputs.dry_run == 'true' }}
       squash: ${{ github.event.inputs.squash != 'false' }}
       event_name: ${{ github.event_name }}
+    # inherit must include repo secret DISCORD_WEBHOOK_FORKS_TAG_BUMP
+    # (incoming webhook for Discord #forks-tag-bump).
     secrets: inherit
     permissions:
       contents: write
