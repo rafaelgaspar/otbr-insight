@@ -52,6 +52,35 @@ func (c *Client) srpRegistry(ctx context.Context) map[string]*srpHost {
 }
 
 // srpAddresses is the address-only view of the registry.
+// DevicesWithSRP lists every SRP host that advertises at least one service.
+// Matter fabric discovery uses this when the device inventory came from REST
+// and omits registration data that only the daemon socket exposes.
+func (c *Client) DevicesWithSRP(ctx context.Context) ([]model.Device, error) {
+	registry := c.srpRegistry(ctx)
+	if len(registry) == 0 {
+		return nil, nil
+	}
+	devices := make([]model.Device, 0, len(registry))
+	for ext, host := range registry {
+		if len(host.Services) == 0 {
+			continue
+		}
+		device := model.Device{
+			ExtendedAddress: ext,
+			ID:              ext,
+			Services:        append([]model.AdvertisedService(nil), host.Services...),
+			IPv6Addresses:   append([]string(nil), host.Addresses...),
+		}
+		if len(host.Addresses) > 0 {
+			device.OMRIPv6Address = host.Addresses[0]
+		}
+		registration := host.Registration
+		device.Registration = &registration
+		devices = append(devices, device)
+	}
+	return devices, nil
+}
+
 func (c *Client) srpAddresses(ctx context.Context) map[string][]string {
 	addresses := map[string][]string{}
 	for ext, host := range c.srpRegistry(ctx) {

@@ -35,10 +35,12 @@ type Instance struct {
 	Addresses []string
 }
 
-// Browser browses over IPv4 multicast on the default interface.
+// Browser browses over IPv4 multicast. Iface names the network interface to
+// bind and join (e.g. the border router's backbone); empty uses the host default.
 type Browser struct {
 	// Wait bounds how long replies are collected; zero means three seconds.
 	Wait time.Duration
+	Iface string
 }
 
 var (
@@ -92,13 +94,28 @@ func (b Browser) Browse(ctx context.Context, service string) ([]Instance, error)
 	}
 	queryName := service + "." + localDomain
 
-	unicast, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: 0})
+	iface, err := resolveInterface(b.Iface)
+	if err != nil {
+		return nil, err
+	}
+	unicastAddr := &net.UDPAddr{IP: net.IPv4zero, Port: 0}
+	if iface != nil {
+		if ip := firstIPv4(iface); ip != nil {
+			unicastAddr.IP = ip
+		}
+	}
+	unicast, err := net.ListenUDP("udp4", unicastAddr)
 	if err != nil {
 		return nil, fmt.Errorf("open mDNS socket: %w", err)
 	}
 	defer unicast.Close()
 	// Best effort: a host that refuses the group still gets unicast replies.
-	multicast, err := net.ListenMulticastUDP("udp4", nil, mdnsGroupV4)
+	var multicast *net.UDPConn
+	if iface != nil {
+		multicast, err = net.ListenMulticastUDP("udp4", iface, mdnsGroupV4)
+	} else {
+		multicast, err = net.ListenMulticastUDP("udp4", nil, mdnsGroupV4)
+	}
 	if err == nil {
 		defer multicast.Close()
 	}
@@ -320,4 +337,31 @@ func (c *collector) instances() []Instance {
 		out = append(out, instance)
 	}
 	return out
+}
+
+func resolveInterface(name string) (*net.Interface, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return nil, nil
+	}
+	iface, err := net.InterfaceByName(name)
+	if err != nil {
+		return nil, fmt.Errorf("mDNS interface %q: %w", name, err)
+	}
+	return iface, nil
+}
+
+func firstIPv4(iface *net.Interface) net.IP {
+	addrs, err := iface.Addrs()
+	if err != nil {
+		return nil
+	}
+	for _, addr := range addrs {
+		ipNet, ok := addr.(*net.IPNet)
+		if !ok || ipNet.IP.To4() == nil {
+			continue
+		}
+		return ipNet.IP.To4()
+	}
+	return nil
 }
