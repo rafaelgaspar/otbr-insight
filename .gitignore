@@ -31,3 +31,7 @@ dataset-backup.json
 
 # Python bytecode from tools/screenshots
 __pycache__/
+
+# fork-pack CI checkout and tag-bump log (never commit)
+.fork-pack/
+rebuild.log
