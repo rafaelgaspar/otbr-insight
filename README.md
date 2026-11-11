@@ -11,6 +11,7 @@ This repository is a [rafaelgaspar](https://github.com/rafaelgaspar) fork of [su
 | Daemon socket read timeout | `feat/daemon-socket-timeout` | `--otbr-socket-timeout` / `OTBR_INSIGHT_OTBR_SOCKET_TIMEOUT` (default 300s) |
 | REST discovery fallback | `feat/refresh-mesh-fallback` | Run OTBR sweeps when live mesh fails |
 | Link metrics from topology | `feat/link-metrics-topology` | Device list RSSI/margin from diagnostics |
+| Runtime mesh/mDNS fixes | `feat/insight-runtime-fixes` | Mesh backoff, history busy, Matter SRP, mDNS iface |
 
 Fork workflow: `.cursor/skills/rafaelgaspar-fork/SKILL.md` (from [fork-pack](https://github.com/rafaelgaspar/fork-pack)).
 

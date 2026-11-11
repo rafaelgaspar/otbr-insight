@@ -26,3 +26,21 @@ func TestEnrichDeviceLinkMetricsFromChildLink(t *testing.T) {
 		t.Fatalf("LinkMargin = %v, want 12", inventory.Items[0].LinkMargin)
 	}
 }
+
+func TestEnrichDeviceLinkMetricsFromRouterLink(t *testing.T) {
+	rssi := -72
+	margin := 28
+	inventory := &model.DeviceInventory{
+		Items: []model.Device{{ID: "aaaabbbbccccdddd", ExtendedAddress: "aaaabbbbccccdddd", Role: "router"}},
+	}
+	topology := model.Topology{
+		Links: []model.TopologyLink{{
+			Type: "router", Source: "1111222233334444", Target: "aaaabbbbccccdddd",
+			AverageRSSI: &rssi, LinkMargin: &margin,
+		}},
+	}
+	enrichDeviceLinkMetrics(inventory, topology)
+	if inventory.Items[0].RSSI == nil || *inventory.Items[0].RSSI != -72 {
+		t.Fatalf("RSSI = %v, want -72", inventory.Items[0].RSSI)
+	}
+}
