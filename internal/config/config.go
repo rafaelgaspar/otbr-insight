@@ -23,6 +23,7 @@ type Config struct {
 	LogLevel          string
 	DataDir           string
 	OTBRSocket        string
+	OTBRSocketTimeout time.Duration
 }
 
 // defaults returns the configuration before any flag is applied: the built-in
@@ -40,6 +41,16 @@ func defaults() (Config, error) {
 		// Only usable when otbr-insight runs on the border router itself; harmless
 		// elsewhere, where the socket simply will not exist.
 		OTBRSocket: envOr("OTBR_INSIGHT_OTBR_SOCKET", otctl.DefaultSocket),
+		// meshdiag topology + per-router childtable on a large mesh routinely
+		// outlives the 30s otctl default; 300s is enough without hanging forever.
+		OTBRSocketTimeout: 300 * time.Second,
+	}
+	if raw := os.Getenv("OTBR_INSIGHT_OTBR_SOCKET_TIMEOUT"); raw != "" {
+		d, err := time.ParseDuration(raw)
+		if err != nil {
+			return Config{}, fmt.Errorf("parse OTBR_INSIGHT_OTBR_SOCKET_TIMEOUT: %w", err)
+		}
+		cfg.OTBRSocketTimeout = d
 	}
 	if raw := os.Getenv("OTBR_INSIGHT_POLL_INTERVAL"); raw != "" {
 		d, err := time.ParseDuration(raw)
@@ -68,6 +79,7 @@ func bindFlags(fs *flag.FlagSet, cfg *Config) {
 	fs.StringVar(&cfg.LogLevel, "log-level", cfg.LogLevel, "log level: debug, info, warn, error")
 	fs.StringVar(&cfg.DataDir, "data-dir", cfg.DataDir, "directory for persisted device names and the dataset backup (empty disables both)")
 	fs.StringVar(&cfg.OTBRSocket, "otbr-socket", cfg.OTBRSocket, "OpenThread daemon socket for capabilities the REST API lacks; empty disables (only usable on the border router host)")
+	fs.DurationVar(&cfg.OTBRSocketTimeout, "otbr-socket-timeout", cfg.OTBRSocketTimeout, "read timeout for the OpenThread daemon socket; meshdiag on a large mesh needs several minutes")
 }
 
 // envVars documents each flag's environment-variable equivalent, in the order the
@@ -80,6 +92,7 @@ var envVars = [][2]string{
 	{"OTBR_INSIGHT_LOG_LEVEL", "log-level"},
 	{"OTBR_INSIGHT_DATA_DIR", "data-dir"},
 	{"OTBR_INSIGHT_OTBR_SOCKET", "otbr-socket"},
+	{"OTBR_INSIGHT_OTBR_SOCKET_TIMEOUT", "otbr-socket-timeout"},
 }
 
 // printDefaults is flag.PrintDefaults with double-hyphen names, matching how this
@@ -147,6 +160,9 @@ func Parse(args []string) (Config, error) {
 func (c Config) Validate() error {
 	if strings.TrimSpace(c.Listen) == "" {
 		return errors.New("listen address cannot be empty")
+	}
+	if c.OTBRSocketTimeout < time.Second {
+		return errors.New("OTBR socket timeout must be at least 1s")
 	}
 	if c.PollInterval < time.Second {
 		return errors.New("poll interval must be at least 1s")
