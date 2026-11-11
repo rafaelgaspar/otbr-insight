@@ -74,7 +74,8 @@ func main() {
 	// Matter fabrics are discovered by browsing the LAN's mDNS. Any host can do
 	// this; it is not tied to the border router.
 	monitor := service.NewMonitor(client, cfg.PollInterval, logger,
-		service.WithDiscoveryInterval(cfg.DiscoveryInterval), service.WithServiceBrowser(mdns.Browser{}))
+		service.WithDiscoveryInterval(cfg.DiscoveryInterval),
+		service.WithServiceBrowser(mdns.Browser{Wait: 3 * time.Second, Iface: cfg.MDNSInterface}))
 
 	nameStore := names.New(cfg.DataDir)
 	if err := nameStore.Load(); err != nil {

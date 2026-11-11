@@ -299,6 +299,9 @@ func (m *Monitor) refreshDevices(ctx context.Context) {
 		m.devices.Stale = len(m.devices.Items) > 0
 		m.devices.LastAttempt = attempt
 		m.devices.Error = err.Error()
+		if m.devices.Stale {
+			enrichDeviceLinkMetrics(&m.devices, m.topology)
+		}
 		m.logger.Warn("OTBR device refresh failed", "error", err)
 		return
 	}
@@ -467,9 +470,48 @@ func (m *Monitor) MatterFabrics(ctx context.Context) (*model.FabricScan, error) 
 	if err != nil && len(instances) == 0 {
 		return nil, err
 	}
-	scan.Fabrics = matter.Fabrics(instances, m.DeviceSnapshot().Items)
+	devices := m.DeviceSnapshot().Items
+	if enricher, ok := m.provider.(interface {
+		FabricDeviceContext(context.Context) ([]model.Device, error)
+	}); ok {
+		if extra, srpErr := enricher.FabricDeviceContext(ctx); srpErr == nil {
+			devices = mergeFabricDeviceData(devices, extra)
+		}
+	}
+	scan.Fabrics = matter.Fabrics(instances, devices)
 	for _, fabric := range scan.Fabrics {
 		scan.NodeCount += fabric.NodeCount
 	}
 	return scan, nil
+}
+
+func mergeFabricDeviceData(base, extra []model.Device) []model.Device {
+	if len(extra) == 0 {
+		return base
+	}
+	byExt := make(map[string]int, len(base))
+	out := append([]model.Device(nil), base...)
+	for i, device := range out {
+		if ext := strings.ToLower(device.ExtendedAddress); ext != "" {
+			byExt[ext] = i
+		}
+	}
+	for _, device := range extra {
+		ext := strings.ToLower(device.ExtendedAddress)
+		if ext == "" || len(device.Services) == 0 {
+			continue
+		}
+		if i, ok := byExt[ext]; ok {
+			if len(out[i].Services) == 0 {
+				out[i].Services = append([]model.AdvertisedService(nil), device.Services...)
+			}
+			if out[i].OMRIPv6Address == "" && device.OMRIPv6Address != "" {
+				out[i].OMRIPv6Address = device.OMRIPv6Address
+			}
+			continue
+		}
+		byExt[ext] = len(out)
+		out = append(out, device)
+	}
+	return out
 }
